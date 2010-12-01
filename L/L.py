@@ -1,7 +1,10 @@
+#!/usr/bin/env python3
+# fsmcompile -i ../letter_symbols.txt  -o ../word_symbols.txt -t transitions.txt  > L.fsm
+
 import re
 
 symbolList = []
-g = open("labels_original.txt")
+g = open("../word_symbols.txt")
 
 while True:
 	tmp = g.readline().strip().split(' ')[0]
