@@ -40,14 +40,14 @@ for symbol in symbolList:
 	node.children["</w>"] = (0, symbol)
 	#stateIndex = stateIndex + 1
 	 
-t = open("transitions.txt","w")
+t = open("transitions.txt", "w")
 
 
 def x(node):
 	global stateIndex, t
 	currentStateIndex = stateIndex
 	
-	for letter,target in node.children.items():
+	for letter, target in node.children.items():
 		if letter == "</w>":
 			print(node.index, node.children["</w>"][0], "</w>", node.children["</w>"][1], file=t)
 			#print(node.children["</w>"][0], file=t)

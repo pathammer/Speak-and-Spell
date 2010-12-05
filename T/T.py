@@ -10,20 +10,24 @@ import string
 
 t = open("transitions.txt", "w")
 
+stateNumber = 1
 for input in string.ascii_lowercase:
 	for output in string.ascii_lowercase:
 		if input == output:
-			print('0', '0', input, output, 0, file=t)
+			print(0, 0, input, output, 0, file=t)
 		else:
-			print('0', '0', input, output, 1, file=t)
+			print(0, 0, input, output, 1, file=t)
+			print(0, stateNumber, input, output, 1, file=t)
+			print(stateNumber, 0, output, input, 0, file=t)
+			
 			
 for input in string.ascii_lowercase:
-	print('0', '0', input, '<eps>', 1, file=t)
+	print(0, 0, input, '<eps>', 1, file=t)
 
 for output in string.ascii_lowercase:
-	print('0', '0', '<eps>', output, 1, file=t)
+	print(0, 0, '<eps>', output, 1, file=t)
 
-print('0', file=t)
+print(0, file=t)
 
 
 t.close()
@@ -43,7 +47,7 @@ def q(word, fileName):
 	print(stateNumber, file=f)
 
 q("hello","in.txt")
-q("helll","out.txt")
+q("helol","out.txt")
 os.system("fstcompile --isymbols=../letter_symbols.txt --osymbols=../letter_symbols.txt in.txt > in.fst")
 os.system("fstcompile --isymbols=../letter_symbols.txt --osymbols=../letter_symbols.txt out.txt > out.fst")
 os.system("fstcompose in.fst T.fst > first.fst")
