@@ -27,6 +27,8 @@ for input in string.ascii_lowercase:
 for output in string.ascii_lowercase:
 	print(0, 0, '<eps>', output, 1, file=t)
 
+print(0, 0, '</w>','</w>', file=t)
+print(0, 0, '</s>','</s>', file=t)
 print(0, file=t)
 
 
