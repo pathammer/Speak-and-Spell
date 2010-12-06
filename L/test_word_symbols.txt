@@ -1,0 +1,11 @@
+<eps> 0
+<unknown> 1
+<s> 2
+</s> 3
+<w> 4
+</w> 5
+hell 26475
+helle 26476
+heller 26477
+hellman 26478
+hellmuth 26479

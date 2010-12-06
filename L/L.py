@@ -5,7 +5,7 @@ import re
 
 symbolList = []
 g = open("../word_symbols.txt")
-#g = open("labels.txt")
+#g = open("test_word_symbols.txt")
 
 while True:
 	tmp = g.readline().strip().split(' ')[0]
@@ -14,6 +14,8 @@ while True:
 	if re.match(".*[^a-z].*", tmp): #if there is non a-z letter, reject.
 		continue
 	symbolList.append(tmp)
+
+g.close()
 
 stateIndex = 0
 
@@ -40,7 +42,7 @@ for symbol in symbolList:
 	#stateIndex = stateIndex + 1
 	 
 t = open("L.txt", "w")
-
+#t = open("test_L.txt", "w")
 
 def x(node):
 	global stateIndex, t
@@ -58,7 +60,13 @@ x(root)
 print(0, stateIndex, "</s>", "</s>", file=t)
 print(stateIndex, file=t)
 
+t.close()
+
 os.system("fstcompile --isymbols=../letter_symbols.txt --osymbols=../word_symbols.txt L.txt | fstarcsort > L.fst")
-os.system("fstdraw -i --isymbols=../letter_symbols.txt --osymbols=../word_symbols.txt < L.fst | dot -Tps > L.ps")
+#os.system("fstdraw --isymbols=../letter_symbols.txt --osymbols=../word_symbols.txt < L.fst | dot -Tps > L.ps") #takes too long time
+
+#os.system("fstcompile --isymbols=../letter_symbols.txt --osymbols=../word_symbols.txt test_L.txt | fstarcsort > test_L.fst")
+#os.system("fstdraw --isymbols=../letter_symbols.txt --osymbols=../word_symbols.txt < test_L.fst | dot -Tps > test_L.ps")
+
 
 print("finished!")
