@@ -36,18 +36,18 @@ while True:
 	wrong = line.split('\t')[0].lower()
 	correct = line.split('\t')[1].lower()
 
-	wordTransitions(wrong,"WrongTransitions.txt")
-	wordTransitions(correct,"CorrectTransitions.txt")
+	wordTransitions(wrong,"tmp_WrongWord.txt")
+	wordTransitions(correct,"tmp_CorrectWord.txt")
 	
-	os.system("fstcompile --isymbols=../letter_symbols.txt --osymbols=../letter_symbols.txt WrongTransitions.txt > WrongTransitions.fst")
-	os.system("fstcompile --isymbols=../letter_symbols.txt --osymbols=../letter_symbols.txt CorrectTransitions.txt > CorrectTransitions.fst")
+	os.system("fstcompile --isymbols=../letter_symbols.txt --osymbols=../letter_symbols.txt tmp_WrongWord.txt > tmp_WrongWord.fst")
+	os.system("fstcompile --isymbols=../letter_symbols.txt --osymbols=../letter_symbols.txt tmp_CorrectWord.txt > tmp_CorrectWord.fst")
 	
-	os.system("fstcompose WrongTransitions.fst T.fst > Composed1.fst")
-	os.system("fstcompose Composed1.fst CorrectTransitions.fst > Composed2.fst")
-	os.system("fstshortestpath Composed2.fst > ComposedShortestPath.fst")
-	os.system("fstprint --isymbols=../letter_symbols.txt --osymbols=../letter_symbols.txt ComposedShortestPath.fst > ComposedShortestPath.txt")
+	os.system("fstcompose tmp_WrongWord.fst T.fst > tmp_Composed1.fst")
+	os.system("fstcompose tmp_Composed1.fst tmp_CorrectWord.fst > tmp_Composed2.fst")
+	os.system("fstshortestpath tmp_Composed2.fst > tmp_ComposedShortestPath.fst")
+	os.system("fstprint --isymbols=../letter_symbols.txt --osymbols=../letter_symbols.txt tmp_ComposedShortestPath.fst > tmp_ComposedShortestPath.txt")
 	
-	countFile = open("ComposedShortestPath.txt",'r')
+	countFile = open("tmp_ComposedShortestPath.txt",'r')
 	while True:
 		line2 = countFile.readline()
 		if line2 == "":
@@ -57,13 +57,15 @@ while True:
 			continue
 		count[(line2.split('\t')[2],line2.split('\t')[3])] = count[(line2.split('\t')[2],line2.split('\t')[3])] + 1
 		
+os.remove("tmp_WrongWord.txt")
+os.remove("tmp_WrongWord.fst")
+os.remove("tmp_CorrectWord.txt")
+os.remove("tmp_CorrectWord.fst")
+os.remove("tmp_Composed1.fst")
+os.remove("tmp_Composed2.fst")
+os.remove("tmp_ComposedShortestPath.fst")
+os.remove("tmp_ComposedShortestPath.txt")
 
 CountFile = open("count.txt",'w')
 for key, value in count.items():
 	print(key[0], key[1], value,file=CountFile)
-#wordfst("hello","in.txt")
-#wordfst("helol","out.txt")
-#os.system("fstcompile --isymbols=../letter_symbols.txt --osymbols=../letter_symbols.txt in.txt > in.fst")
-#os.system("fstcompile --isymbols=../letter_symbols.txt --osymbols=../letter_symbols.txt out.txt > out.fst")
-#os.system("fstcompose in.fst T.fst > first.fst")
-#os.system("fstcompose first.fst out.fst > second.fst")

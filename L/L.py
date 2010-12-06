@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
-# fsmcompile -i ../letter_symbols.txt  -o ../word_symbols.txt -t transitions.txt  > L.fsm
-# fsmdraw -i ../letter_symbols.txt -o ../word_symbols.txt < L.fsm | dot -Tps > L.ps
 
+import os
 import re
 
 symbolList = []
@@ -40,7 +39,7 @@ for symbol in symbolList:
 	node.children["</w>"] = (0, symbol)
 	#stateIndex = stateIndex + 1
 	 
-t = open("transitions.txt", "w")
+t = open("L.txt", "w")
 
 
 def x(node):
@@ -58,4 +57,8 @@ def x(node):
 x(root)
 print(0, stateIndex, "</s>", "</s>", file=t)
 print(stateIndex, file=t)
+
+os.system("fstcompile --isymbols=../letter_symbols.txt --osymbols=../word_symbols.txt L.txt | fstarcsort > L.fst")
+os.system("fstdraw -i --isymbols=../letter_symbols.txt --osymbols=../word_symbols.txt < L.fst | dot -Tps > L.ps")
+
 print("finished!")
