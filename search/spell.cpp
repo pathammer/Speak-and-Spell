@@ -11,21 +11,20 @@
 using namespace std;
 #include "timer.cpp"
 #include "input.cpp"
-class timer;
-class input;
 
 void demo() {
-  timer egg;
-  egg.wait(3);
-  printf("I just waited %f seconds!\n",egg.getClock());
+  Timer egg;
+  egg.wait(3);//pass integer in seconds
+  printf("I just waited %f seconds!\n",egg.getClock()); //returns a double in seconds
   
-  timer fileTimer;
+  Timer fileTimer;
   string fileName;
   fileName = "text.txt";
-  Input train (fileName);
+  Input train (fileName); //takes a string filename - this would also work Input train ("file.txt");
   while (!train.isEof()) {
-	cout << train.getNext() << endl;
-  }
+	cout << train.getNext() << endl; //returns a string, or "/E0F" if you didn't check for isEof() and over-read the file
+  }//autimaticlly closes the stream at EOF
+  
   printf("Reading fie file took %f seconds.\n", fileTimer.getClock());
 }
 

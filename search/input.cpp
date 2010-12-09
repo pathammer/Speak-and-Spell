@@ -27,14 +27,17 @@ public:
 	}
 	else {
 	  fileStream.close();
-	  return "/EOF";
+	  return "/E0F";
 	}
   }
-	int isEof() {
+  int isEof() {
 	if (fileStream.eof()) {
 	  fileStream.close();
   	  return 1;
 	}
 	else return 0;
+  }
+  void close() {
+	fileStream.close();
   }
 };

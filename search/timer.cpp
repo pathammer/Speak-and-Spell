@@ -1,10 +1,10 @@
 #include <stdio.h>
 #include <time.h>
 
-class timer {
+class Timer {
   clock_t init, final;
 public:
-  timer() {
+  Timer() {
 	init=clock();
   }
   double getClock() {
