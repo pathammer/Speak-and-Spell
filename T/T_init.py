@@ -8,7 +8,8 @@
 import os
 import string
 
-t = open("T.txt", "w")
+
+t = open("T_init.txt", "w")
 
 stateNumber = 1
 for input in string.ascii_lowercase:
@@ -34,8 +35,8 @@ print(0, file=t)
 
 t.close()
 
-os.system("fstcompile --isymbols=../letter_symbols.txt --osymbols=../letter_symbols.txt T.txt > T.fst")
-os.system("fstdraw --isymbols=../letter_symbols.txt --osymbols=../letter_symbols.txt < T.fst | dot -Tps > T.ps")
+os.system("fstcompile --isymbols=../letter_symbols.txt --osymbols=../letter_symbols.txt T_init.txt > T_init.fst")
+os.system("fstdraw --isymbols=../letter_symbols.txt --osymbols=../letter_symbols.txt < T_init.fst | dot -Tps > T_init.ps")
 
 print("finished!")
 
