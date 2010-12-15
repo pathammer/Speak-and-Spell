@@ -1,14 +1,19 @@
 #!/usr/bin/python3
 
-# state state input output weight
-
-#fstcompile --isymbols=../letter_symbols.txt --osymbols=../letter_symbols.txt transitions.txt > test.fst
-#fstdraw --isymbols=../letter_symbols.txt --osymbols=../letter_symbols.txt < test.fst | dot -Tps > test.ps
-
 import os
 import string
 from itertools import *
 import sys
+
+def wordTransitions(word, fileName):
+	f = open(fileName, "w")
+	stateNumber = 0
+	for letter in word:
+		print(stateNumber, stateNumber+1, letter, letter, file=f)
+		stateNumber = stateNumber + 1
+	print(stateNumber, file=f)
+
+
 
 print("./T_count [T transducer file] [output count txt file]")
 filename1 = sys.argv[1]
@@ -29,20 +34,11 @@ for input in chain(string.ascii_lowercase):
 			continue
 		count[(input + output, output+input)] = 0
 
-
-def wordTransitions(word, fileName):
-	f = open(fileName, "w")
-	stateNumber = 0
-	for letter in word:
-		print(stateNumber, stateNumber+1, letter, letter, file=f)
-		stateNumber = stateNumber + 1
-	print(stateNumber, file=f)
-
-
 misspell = open("machine_readable3.txt",'r')
 # misspell = open("test.txt",'r')
 
 flag = True
+totalProb = 0
 while flag:
 	line = misspell.readline()
 	if line == "":
@@ -68,7 +64,9 @@ while flag:
 		sline = line2.split();
 		if len(sline) < 4:
 			continue
-
+		
+		if len(sline) == 5:
+			totalProb += float(sline[4])
 		try:
 			prevline = lines[idx-1].split()
 			if sline[3] == prevline[2] and sline[2] == prevline[3]:
@@ -79,7 +77,7 @@ while flag:
 		        pass
 		
 		count[(sline[2], sline[3])] += 1
-	# flag = False
+	#flag = False
 
 os.remove("tmp_WrongWord.txt")
 os.remove("tmp_WrongWord.fst")
@@ -93,3 +91,9 @@ os.remove("tmp_ComposedShortestPath.txt")
 CountFile = open(filename2,'w')
 for key, value in count.items():
 	print(key[0], key[1], value,file=CountFile)
+CountFile.close()
+
+logFile = open('totalProb.log','a')
+line = filename1 + str(totalProb) + '\n'
+logFile.write(line)
+logFile.close()
