@@ -30,6 +30,16 @@ public:
 	  return "/E0F";
 	}
   }
+  string getNextWord () { //returns the next all character string in the file
+	string temp;
+	while (!fileStream.eof()) {
+	  fileStream >> temp;
+	  if (temp[0]<122 && temp[0]>64) return temp;
+	}
+	fileStream.close();
+	return "/E0F";
+  }
+  
   int isEof() {
 	if (fileStream.eof()) {
 	  fileStream.close();
