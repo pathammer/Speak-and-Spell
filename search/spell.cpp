@@ -11,12 +11,18 @@
 using namespace std;
 #include "timer.cpp"
 #include "input.cpp"
+#include "makeFst.cpp"
+#include "makeFst.cpp"
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <fst/fstlib.h>
 
 void demo() {
+  makeFst tree;
+  VectorFst<StdArc> out = tree.StringToFst("hello");
+
   Timer egg;
   egg.wait(1);//pass integer in seconds
   printf("I just waited %f seconds!\n",egg.getClock()); //returns a double in seconds
