@@ -130,7 +130,7 @@ int process() { //written by nathaniel
 	int j = 0;
 	for (i = 0; i < m; i++) {
 		firstWord[i] = -1; //just a flag that it's the beginning of the file
-		secondWord[i] = 0; 
+		secondWord[i] = 0; //NOTE: SHOULD BE START SYMBOL
 	}
 	int pid;
   string fileName;
@@ -198,6 +198,7 @@ int process() { //written by nathaniel
 //	StdFst *inputFST3 = StdFst::Read(inputFSTS[1].c_str());
 	Compose(inputFST2,*TL,&input);
 	ShortestPath(input, &result_fst, 10);
+
 	Compose(result_fst,*G,&input);
 	ShortestPath(input, &result_fst,10);
 	
@@ -360,7 +361,7 @@ int process() { //written by nathaniel
 	newFST.SetStart(0);
 	int currState;
 
-	if (firstWord[0] == -1) {
+	if (first == 0) {
 		for (i = 0; i < m; i++) {
 			currState = newFST.AddState();
 			newFST.AddArc(0, StdArc(0, secondWord[i], 0, currState));
@@ -412,7 +413,7 @@ int process() { //written by nathaniel
 		weights[i] = weight1.Value();
 		int currState = arc.nextstate;
 		int maxCount = 2;
-		if (firstWord[0] == -1)
+		if (first == 0)
 			maxCount--;
 
 		while (done == 0) {
