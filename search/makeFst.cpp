@@ -1,27 +1,57 @@
-#include <sstream>
+#include <fst/fstlib.h>
 #include <iostream>
 #include <string>
 
-class MakeFst {
-  std::stringstream output;
-public:
+class makeFst {
 
-  MakeFst (string input) {
-	int stateNumber = 0;
-	for (int i = 0; i<input.size(); i++) {
-	  output << stateNumber << "\t" << (stateNumber+1) << "\t" << input[i] << "\t" << input[i] << "\n";
-	  stateNumber++;
+  struct Symbol
+  {
+	SymbolTable *Letter;
+	SymbolTable *Word;
+	Symbol()
+	{
+	  Letter = SymbolTable::ReadText("../letter_symbols.txt", false);
+	  Word = SymbolTable::ReadText("../word_symbols.txt", false);
 	}
-	output << stateNumber << "\t" << (stateNumber+1) << "\t" << "</w>\t</w>\n";
-	  stateNumber++;
+  } SYMBOL;
 
- output << stateNumber << "\t" << (stateNumber+1) << "\t" << "</s>\t</s>\n";
-	  stateNumber++;
+  VectorFst<StdArc> StringToFst(char str[])
+  {
+	VectorFst < StdArc > result;
+	VectorFst<StdArc>::StateId si1;
+	VectorFst<StdArc>::StateId si2;
+	
+	si1 = result.AddState();
+	si2 = si1;
+	result.SetStart(si1);
+	for (char *ptr = str; *ptr != '\0'; ++ptr)
+	  {
+		si2 = result.AddState();
+		char letter[2] =
+		  { *ptr, '\0' };
+		VectorFst<StdArc>::Arc arc(SYMBOL.Letter->Find(letter),
+								   SYMBOL.Letter->Find(letter), 0, si2);
+		result.AddArc(si1, arc);
+		si1 = si2;
+	  }
+	si2 = result.AddState();
 
-	output << stateNumber;
-  }
-  
-  string getString() {
-	return output.str();
+	VectorFst<StdArc>::Arc arc(SYMBOL.Letter->Find("</w>"),
+							   SYMBOL.Letter->Find("</w>"), 0, si2);
+	result.AddArc(si1, arc);
+	si1 = si2;
+
+	si2 = result.AddState();
+
+	VectorFst<StdArc>::Arc arc(SYMBOL.Letter->Find("</s>"),
+							   SYMBOL.Letter->Find("</s>"), 0, si2);
+	result.AddArc(si1, arc);
+	si1 = si2;	
+
+	result.SetFinal(si2, 0);
+
+	//result.Write("test.fst");// for debug
+	return result;
+
   }
 };
