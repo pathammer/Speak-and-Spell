@@ -17,6 +17,7 @@
 #include <fst/queue.h>
 #include "timer.cpp"
 #include "input.cpp"
+#include <vector>
 
 using namespace std;
 using namespace fst;
@@ -30,9 +31,11 @@ struct Symbol
 	{
 		Letter = SymbolTable::ReadText("../letter_symbols.txt", false);
 		Word = SymbolTable::ReadText("../word_symbols.txt", false);
+
 	}
 } SYMBOL;
 
+//Converts a string into an FST that outputs its characters one at a time
 VectorFst<StdArc> StringToFst(const char* str)
 {
 	VectorFst < StdArc > result;
@@ -99,11 +102,48 @@ private:
 	const StateTable &state_table_;
 };
 
-float* TLShortestPath(MutableArcIterator<VectorFst<StdArc> > *TLArcs[44694], string currword, int numBestPath, int beamWidth, VectorFst<StdArc> *TL) {
+StdFst *G = StdFst::Read("../G/train.3.lm.fst");
+VectorFst<StdArc> *TL = VectorFst<StdArc>::Read("../TL.fst");
+MutableArcIterator<VectorFst<StdArc> > *TLArcs[44694];
+
+void init() {
+	Timer initializing; 
+	StateId state_id;
+	int i = 0;
+	int j = 0;
+	
+	//Builds an array of MutableArcIterators so that we can modify TL (needed for
+	//finding n best paths)
+	
+	for (StateIterator<StdFst> siter(*TL); !siter.Done(); siter.Next()) 
+	{
+		state_id = siter.Value();
+		i = -1; //Keeps track of how many Nexts were perforemed
+		//i.e. which specific arc are we looking for
+		for (ArcIterator<StdFst> aiter((*TL), state_id); !aiter.Done(); aiter.Next())
+		{
+			i++;
+			const StdArc &arc = aiter.Value();
+			if (arc.olabel > 3) {
+				TLArcs[arc.olabel] = new MutableArcIterator<VectorFst<StdArc> > ((TL), state_id);
+				for (j = 0; j < i; j++) 
+					TLArcs[arc.olabel]->Next();				
+			}
+			
+		}
+	}
+	printf("Initializing took %f seconds.\n", initializing.getClock());
+
+}
+
+//Input: string
+//Output:
+//		word.0, weight.0, ..., word.n, weight.n
+vector<float> TLShortestPath(MutableArcIterator<VectorFst<StdArc> > *TLArcs[44694], string currword, int numBestPath, int beamWidth, VectorFst<StdArc> *TL) {
 	int i = 0;
 	int remWord;
 	float wordWeight = 0;
-	float *result = new float[2*numBestPath];
+	vector<float> result (2*numBestPath);
 	int prevPaths[numBestPath];
 	float prevWeights[numBestPath];
 
@@ -111,10 +151,14 @@ float* TLShortestPath(MutableArcIterator<VectorFst<StdArc> > *TLArcs[44694], str
 	VectorFst < StdArc > ofst;
 	StateId state_id;
 	
+	//Basically, this program finds a best path, then removes that edge from ToL,
+	//Then finds a new best path, and repeats, and then puts the edges back in
+	//Note: We had to do it th
 	for (i = 0; i < numBestPath; i++) {
 
 		wordWeight = 0;
 		
+		//On the fly composition
 		ComposeFstOptions < StdArc > copts;
 		copts.state_table = new GenericComposeStateTable<StdArc,
 		IntegerFilterState<signed char> > (I, *TL);
@@ -130,6 +174,7 @@ float* TLShortestPath(MutableArcIterator<VectorFst<StdArc> > *TLArcs[44694], str
 			&state_queue, ArcFilter());
 		shortest_path_opts.first_path = true;
 		ShortestPath(composed, &ofst, &distance, shortest_path_opts);
+		//extract word and weight
 		for (StateIterator<StdFst> siter(ofst); !siter.Done(); siter.Next()) 
 		{
 			state_id = siter.Value();
@@ -144,16 +189,19 @@ float* TLShortestPath(MutableArcIterator<VectorFst<StdArc> > *TLArcs[44694], str
 				
 			}
 		}
+		//remember the number corresponding to the word and its original weight
 		prevPaths[i] = remWord;
 		prevWeights[i] = wordWeight;
 		result[2*i] = remWord;
 		result[2*i+1] = wordWeight;
-		//Removing word from TL
+		//Removing word from TL (just gives it a very large weight so the path
+		//won't be taken again)
 		const StdArc &arc = (*TLArcs[remWord]).Value();
 		StdArc arc2 = arc;
 		arc2.weight = 99999;
 		(*TLArcs[remWord]).SetValue(arc2);
 	}
+	//Restore the original weights so that the same word can be chosen again later
 	for (i = 0; i < numBestPath; i++) {
 		const StdArc &arc = (*TLArcs[prevPaths[i]]).Value();
 		StdArc arc2 = arc;
@@ -164,7 +212,12 @@ float* TLShortestPath(MutableArcIterator<VectorFst<StdArc> > *TLArcs[44694], str
 	return result;
 }
 
-float* composeTwoWords(MutableArcIterator<VectorFst<StdArc> > *TLArcs[44694], string currword, int numBestPath, int beamWidth, VectorFst<StdArc> *TL, StdFst *G, float *inWords, int TLGRatio) {
+//Basically the same as composeThreeWords
+//Input: a word (the 2nd word), and a list of choices and weights for the 1st word
+//Output: 
+// word1.0, word2.0,..., word1.n, word2.n
+//		weight2.0, ..., weight2.n (note: edit-distance)
+vector<float> composeTwoWords(MutableArcIterator<VectorFst<StdArc> > *TLArcs[44694], string currword, int numBestPath, int beamWidth, VectorFst<StdArc> *TL, StdFst *G, float *inWords, int TLGRatio) {
 	StateId state_id;
 	int state_value;
 	int start_states[numBestPath];
@@ -173,7 +226,7 @@ float* composeTwoWords(MutableArcIterator<VectorFst<StdArc> > *TLArcs[44694], st
 	float weights[numBestPath];
 	int words[numBestPath];
 	int currState;
-	float *result = new float[numBestPath*3];
+	vector<float> result(numBestPath*3);
 
 	int done = 0;	
 	int i = 0;
@@ -189,16 +242,16 @@ float* composeTwoWords(MutableArcIterator<VectorFst<StdArc> > *TLArcs[44694], st
 
 	VectorFst<StdArc> inputFST = StringToFst(currword.c_str());
 	
-	float *TLResult = new float[2*numBestPath];
+	vector<float> TLResult (2*numBestPath);
 	TLResult = TLShortestPath(TLArcs, currword, numBestPath, beamWidth, TL);
 	
 	for (i = 0; i < numBestPath; i++) {
 		words[i] = TLResult[2*i];
 		weights[i] = TLResult[2*i+1];
-		result[2*numBestPath+i] = TLResult[2*i+1];
 	}
 	
-	//create an FST with every pair of words, keeping the weights from TL
+	//create an FST with every pair of words, keeping the weights from
+	//the edit-distance part
 	
 	Timer ITLModify;
 	
@@ -212,9 +265,7 @@ float* composeTwoWords(MutableArcIterator<VectorFst<StdArc> > *TLArcs[44694], st
 	}
 	
 	int finalState = result_fst.AddState();
-	result_fst.AddState();
-	result_fst.AddArc(finalState, StdArc(0, 3, 0, finalState+1));
-	result_fst.SetFinal(finalState+1,0);
+	result_fst.SetFinal(finalState,0);
 	
 	for (i = 0; i < numBestPath; i++) {
 		currState = result_fst.AddState();
@@ -229,6 +280,7 @@ float* composeTwoWords(MutableArcIterator<VectorFst<StdArc> > *TLArcs[44694], st
 	Timer GComp;
 	
 	Compose(result_fst,*G, &input);
+	RmEpsilon(&input);
 	ShortestPath(input, &result_fst, numBestPath);
 	
 //	printf("G comp/shortest path took %f seconds.\n", GComp.getClock());
@@ -251,6 +303,10 @@ float* composeTwoWords(MutableArcIterator<VectorFst<StdArc> > *TLArcs[44694], st
 					result[i] = arc2.olabel;
 					i++;
 					done += 1;
+					if (i%2 == 1)
+						//Set the ED-weight of the word (Note: This is 
+						//still maintained in the composition)
+						result[2*numBestPath+i/2] = arc2.weight.Value();					
 				}
 				currState = arc2.nextstate;
 			}
@@ -261,7 +317,14 @@ float* composeTwoWords(MutableArcIterator<VectorFst<StdArc> > *TLArcs[44694], st
 	
 }
 
-float* composeThreeWords(MutableArcIterator<VectorFst<StdArc> > *TLArcs[44694], string currword, int numBestPath, int beamWidth, VectorFst<StdArc> *TL, StdFst *G, float *inWords, int TLGRatio) {
+//Input: a word (the 3rd word), and a list of choices and weights for the 1st and 2nd word
+//Output: 
+// word2.0, word3.0,..., word2.n, word3.n
+//		weight3.0, ..., weight3.n (note: edit-distance)
+//		Gweight.0, ..., Gweight.n (note: weight for a triple of words from 
+//		edit-distance AND from G
+//		Best choice for word1
+vector<float> composeThreeWords(MutableArcIterator<VectorFst<StdArc> > *TLArcs[44694], string currword, int numBestPath, int beamWidth, VectorFst<StdArc> *TL, StdFst *G, float *inWords, int TLGRatio) {
 	StateId state_id;
 	int state_value;
 	int start_states[numBestPath];
@@ -272,15 +335,16 @@ float* composeThreeWords(MutableArcIterator<VectorFst<StdArc> > *TLArcs[44694], 
 	float weights[numBestPath];
 	int words[numBestPath];
 	int currState;
-	float *result = new float[numBestPath*4 + 1];
+	vector<float> result(numBestPath*4 + 1);
 	
 	int done = 0;	
 	int i = 0;
 	int j = 0;
 	
 	StdVectorFst result_fst;
-	StdVectorFst input; //NEEDED?
+	StdVectorFst input;
 	
+	//seperate information of the lists of words and their weights
 	for (i = 0; i < numBestPath; i++) {
 		firstWord[i] = *(inWords+2*i);
 		secondWord[i] = *(inWords+2*i+1);
@@ -290,13 +354,15 @@ float* composeThreeWords(MutableArcIterator<VectorFst<StdArc> > *TLArcs[44694], 
 	}	
 	
 	VectorFst<StdArc> inputFST = StringToFst(currword.c_str());
-	float *TLResult = new float[2*numBestPath];
+	vector<float> TLResult (2*numBestPath);
+	//Get the choices and weights for the 3rd word
 	TLResult = TLShortestPath(TLArcs, currword, numBestPath, beamWidth, TL);
 	
+	//seperate words and weights from outpur
 	for (i = 0; i < numBestPath; i++) {
 		words[i] = TLResult[2*i];
 		weights[i] = TLResult[2*i+1];
-		result[2*numBestPath+i] = TLResult[2*i+1];
+		result[2*numBestPath+i] = TLResult[2*i+1]; //FIXFIXFIXFIXFIXFIXFIXFIX
 		result[3*numBestPath+i] = 0;
 	}
 	
@@ -304,6 +370,7 @@ float* composeThreeWords(MutableArcIterator<VectorFst<StdArc> > *TLArcs[44694], 
 	
 	Timer ITLModify;
 	
+	//Build a simple FST that basically outputs any combination of the 3 words
 	result_fst.AddState();
 	result_fst.SetStart(0);
 	
@@ -322,9 +389,7 @@ float* composeThreeWords(MutableArcIterator<VectorFst<StdArc> > *TLArcs[44694], 
 	}
 	
 	int finalState = result_fst.AddState();
-	result_fst.AddState();
-	result_fst.AddArc(finalState, StdArc(0, 3, 0, finalState+1));
-	result_fst.SetFinal(finalState+1,0);
+	result_fst.SetFinal(finalState,0);
 	
 	for (i = 0; i < numBestPath; i++) {
 		currState = result_fst.AddState();
@@ -338,21 +403,17 @@ float* composeThreeWords(MutableArcIterator<VectorFst<StdArc> > *TLArcs[44694], 
 	
 	Timer GComp;
 
-	
-//	RmEpsilon(&result_fst);
-	result_fst.Write("beforeG.fst");
+	//Compose our FST with G and get the best paths
 	Compose(result_fst,*G, &input);
 	RmEpsilon(&input);
-	input.Write("middleG.fst");
 	ShortestPath(input, &result_fst, numBestPath);
-	result_fst.Write("afterG.fst");
 
 //	printf("G comp/shortest path took %f seconds.\n", GComp.getClock());
 	
 
-	//Extract words
+	//Extract words and weights
 	i = 0;
-	int first = 0; //NOTE: MOVE THIS
+	int first = 0; 
 	for (ArcIterator<StdFst> aiter((result_fst), 0); !aiter.Done(); aiter.Next())
 	{
 		const StdArc &arc = aiter.Value();
@@ -375,6 +436,10 @@ float* composeThreeWords(MutableArcIterator<VectorFst<StdArc> > *TLArcs[44694], 
 					}
 					if (done != 0) {
 						result[i] =	arc2.olabel;
+						if (i%2 == 1)
+							//Set the ED-weight of the word (Note: This is 
+							//still maintained in the composition)
+							result[2*numBestPath+i/2] = arc2.weight.Value();
 					}
 					if (done != 0) {
 						i++;
@@ -390,15 +455,14 @@ float* composeThreeWords(MutableArcIterator<VectorFst<StdArc> > *TLArcs[44694], 
 	
 }
 
+//Takes in a text and outputs the corrected version of the text
 void inFile(string inputFile, int numBestPath, int beamWidth, int TLGRatio) {
-	Timer initializing;
 	Timer inFileTime; 
-	ofstream outFile; // Note:Needed?
-	int outString[1000]; //Note: Size of output Necessary for some reason???????
+	int outString[1000];
 	float *firstWordList = new float[2*numBestPath];
-	float *TLResult = new float[2*numBestPath];
-	float *TotalResult = new float[4*numBestPath+1];
-	float *inputWordsInput = new float[3*numBestPath];
+	vector<float> TLResult (2*numBestPath);
+	vector<float> TotalResult (4*numBestPath+1);
+	vector<float> inputWordsInput (3*numBestPath);
 	float *inputWords = new float[4*numBestPath];
 	int currState;
 	
@@ -407,52 +471,34 @@ void inFile(string inputFile, int numBestPath, int beamWidth, int TLGRatio) {
 
 	StdVectorFst input;
 	StdVectorFst result_fst;
-	StdFst *G = StdFst::Read("../G/train.3.lm.fst");
-	StdFst *G1 = StdFst::Read("../G/train.1.lm.fst");
-	StdFst *G2 = StdFst::Read("../G/train.2.lm.fst");
-	VectorFst<StdArc> *TL = VectorFst<StdArc>::Read("../TL.fst");
 	StateId state_id;
-
-	MutableArcIterator<VectorFst<StdArc> > *TLArcs[44694];
 	
-	for (StateIterator<StdFst> siter(*TL); !siter.Done(); siter.Next()) 
-	{
-		state_id = siter.Value();
-		i = -1; //Keeps track of how many Nexts were perforemed
-			    //i.e. which specific arc are we looking for
-		for (ArcIterator<StdFst> aiter((*TL), state_id); !aiter.Done(); aiter.Next())
-		{
-			i++;
-			const StdArc &arc = aiter.Value();
-			if (arc.olabel > 3) {
-				TLArcs[arc.olabel] = new MutableArcIterator<VectorFst<StdArc> > ((TL), state_id);
-				for (j = 0; j < i; j++) 
-					TLArcs[arc.olabel]->Next();				
-			}
-			
-		}
-	}
-	
-	printf("Initializing took %f seconds.\n", initializing.getClock());
 
 	
 	Input inputWord (inputFile);
+	//get the next word of the input
 	string currword = inputWord.getNext();
+	//Get the n best choices for the first word
 	TLResult = TLShortestPath(TLArcs, currword, numBestPath, beamWidth, TL);
+	//Build a simple FST that has a start state, end state, and a transition between
+	//for each of the 10 words with its corresponding weight
 	result_fst.AddState();
 	result_fst.SetStart(0);
 	result_fst.AddState();
-	result_fst.AddState();
-	result_fst.AddArc(1, StdArc(0, 3, 0, 2));
-	result_fst.SetFinal(2,0);
+	result_fst.SetFinal(1,0);
 
 	for (i = 0; i < numBestPath; i++) {
 		result_fst.AddArc(0, StdArc(0, TLResult[2*i], TLResult[2*i+1], 1));
 	}
-	Compose(result_fst,*G1,&input);
+	
+	//Compose this FST with G and get shortest paths
+	Compose(result_fst,*G,&input);
 	ShortestPath(input, &result_fst,numBestPath);
 	
-	//Extract the words
+	//Extract the words and weights for the choice of the first word
+	//Note: firstWordList is in the format
+		//word1.0,word1.1,word1.2,...,word1.n
+		//weight1.0,weight1.1,...,weight1.n
 	i=0;
 	for (ArcIterator<StdFst> aiter((result_fst), 0); !aiter.Done(); aiter.Next())
 	{
@@ -479,24 +525,35 @@ void inFile(string inputFile, int numBestPath, int beamWidth, int TLGRatio) {
 		}
 	}
 
+	//get the 2nd word
 	currword = inputWord.getNext();
-	inputWordsInput = composeTwoWords(TLArcs, currword, numBestPath, beamWidth, TL, G2, firstWordList, TLGRatio);	
+	//get the choices and weights for the 2nd word
+	inputWordsInput = composeTwoWords(TLArcs, currword, numBestPath, beamWidth, TL, G, firstWordList, TLGRatio);	
+	//Note: inputWords is int eh format
+		//word1,0, word2.0, word1.1, word2.1, ..., word1.n, word2.n
+		//weight1.0, weight2.0, ..., weight1.n, weight2.n
 	for (i = 0; i < numBestPath; i++) {
 		inputWords[2*i] = inputWordsInput[2*i];
 		inputWords[2*i+1] = inputWordsInput[2*i+1];
 		inputWords[2*i+2*numBestPath] = firstWordList[numBestPath+i];
 		inputWords[2*i+1+2*numBestPath] = inputWordsInput[2*numBestPath+i];
 	}
+	//Loop as long as there are more words to read in the file
 	while(!inputWord.isEof()) {
+		//get the next word
 		currword = inputWord.getNext();
+		//get the results of composing with ToLoG
 		TotalResult = composeThreeWords(TLArcs, currword, numBestPath, beamWidth, TL, G, inputWords, TLGRatio);
+		//store the appropriate values in inputWords
+		//Note that weight0.x is the same as the previous weight1.x
 		for (i = 0; i < numBestPath; i++) {
 			inputWords[2*i] = TotalResult[2*i];
 			inputWords[2*i+1] = TotalResult[2*i+1];
 			inputWords[2*i + 2 * numBestPath] = inputWords[2*i+1+2*numBestPath];
 			inputWords[2*i + 2 * numBestPath + 1] = TotalResult[i+2*numBestPath];
 		}
-		
+		//Print out the word that has now been determined (from the 1st list of 
+		//words that was passed into composeThreeWords
 		Input train ("../word_symbols.txt");
 		for (i = 0; i < TotalResult[4*numBestPath]; i++) {
 			train.getNext();
@@ -505,6 +562,7 @@ void inFile(string inputFile, int numBestPath, int beamWidth, int TLGRatio) {
 		cout << train.getNext() << " ";
 		train.close();
 	}
+	//Output the current best choice for the last 2 words
 	Input train ("../word_symbols.txt");
 
 	for (i = 0; i < TotalResult[0]; i++) {
@@ -525,59 +583,44 @@ void inFile(string inputFile, int numBestPath, int beamWidth, int TLGRatio) {
 
 }
 
+//This function takes 3 words as input and outputs the top choices for the 3rd word and their weights based on the first 2 words
 void outWeight(string firstWord, string secondWord, string thirdWord, int numBestPath, int beamWidth, int TLGRatio) {
-	Timer initializing;
 	Timer inFileTime; 
-	ofstream outFile; // Note:Needed?
-	int outString[1000]; //Note: Size of output Necessary for some reason???????
-	float *TotalResult = new float[4*numBestPath+1];
+	int outString[1000];
+	vector<float> TotalResult(4*numBestPath+1);
 	float *inputWords = new float[4*numBestPath];
 	int currState;
+	//Get the number corresponding to the first word
 	int firstNum = SYMBOL.Word->Find(firstWord);
+	if (firstNum == -1) {
+		printf("%s is an incorrect word\n",firstWord.c_str());
+		return;
+	}
+	//Get the number corresponding to the first word
 	int secondNum = SYMBOL.Word->Find(secondWord);
-	
+	if (secondNum == -1) {
+		printf("%s is an incorrect word\n",secondWord.c_str());
+		return;
+	}	
 	int i = 0;
 	int j = 0;
 	
 	StdVectorFst input;
 	StdVectorFst result_fst;
-	StdFst *G = StdFst::Read("../G/train.3.lm.fst");
-	VectorFst<StdArc> *TL = VectorFst<StdArc>::Read("../TL.fst");
 	StateId state_id;
-	
-	for (i = 0; i < 1000; i++) { //Note: get rid of for loop?
-		outString[i] = -1;
-	}
-	
-	MutableArcIterator<VectorFst<StdArc> > *TLArcs[44694];
-	
-	for (StateIterator<StdFst> siter(*TL); !siter.Done(); siter.Next()) 
-	{
-		state_id = siter.Value();
-		i = -1; //Keeps track of how many Nexts were perforemed
-		//i.e. which specific arc are we looking for
-		for (ArcIterator<StdFst> aiter((*TL), state_id); !aiter.Done(); aiter.Next())
-		{
-			i++;
-			const StdArc &arc = aiter.Value();
-			if (arc.olabel > 3) {
-				TLArcs[arc.olabel] = new MutableArcIterator<VectorFst<StdArc> > ((TL), state_id);
-				for (j = 0; j < i; j++) 
-					TLArcs[arc.olabel]->Next();
-			}
-			
-		}
-	}
-	
-	printf("Initializing took %f seconds.\n", initializing.getClock());
-	
+		
 	for (i = 0; i < numBestPath; i++) {
+		//represents the list of n first words (all the same first word in this case)
 		inputWords[2*i] = firstNum;
+		//represents the list of n second words (all the same second word in this case)
 		inputWords[2*i+1] = secondNum;
-		inputWords[2*numBestPath+2*i] = i*100;
-		inputWords[2*numBestPath+2*i+1] = i*100;		
+		//Set the weights (basically makes it so that only 1 pair of first/second words will be traversed by shortest distance
+		inputWords[2*numBestPath+2*i] = i*1000;
+		inputWords[2*numBestPath+2*i+1] = i*1000;		
 	}
+	//Put the 3 words together
 	TotalResult = composeThreeWords(TLArcs, thirdWord,numBestPath,beamWidth,TL,G,inputWords, TLGRatio);
+	//Print out the word and its weight
 	for (i = 0; i < numBestPath; i++) {
 		Input train ("../word_symbols.txt");
 		for (j = 0; j < TotalResult[2*i+1]; j++) {
@@ -594,7 +637,11 @@ void outWeight(string firstWord, string secondWord, string thirdWord, int numBes
 
 
 int main() {
-//	inFile("input.txt", 10, 10, 5);
-	outWeight("a","b","colsed",10,10,5);
+	init();
+	inFile("input.txt", 10, 10, 5);
+	outWeight("b","a","colsed",3,10,0);
+	inFile("input.txt", 10, 5, 5);
+	inFile("input.txt", 10, 20, 5);
+	inFile("input.txt", 10, 5, 10);
 	return 0;
 }
