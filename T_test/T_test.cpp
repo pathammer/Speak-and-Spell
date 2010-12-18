@@ -2,6 +2,7 @@
 #include <fst/fstlib.h>
 #include <string>
 #include <fst/queue.h>
+#include <fst/determinize.h>
 
 using namespace fst;
 using namespace std;
@@ -82,7 +83,7 @@ private:
 };
 int main()
 {
-	VectorFst < StdArc > I = StringToFst("butthereis");
+	VectorFst < StdArc > I = StringToFst("sanaeta");
 	StdFst *TL = StdFst::Read("../TL.fst");
 
 	VectorFst < StdArc > ofst;
@@ -97,13 +98,16 @@ int main()
 			TropicalWeight, BeamSearchStateEquivClass> state_queue(distance,
 			new NaturalShortestFirstQueue<StdFst::StateId, TropicalWeight> (
 					distance), BeamSearchStateEquivClass(*copts.state_table),
-			10);
+			100);
 
 	ShortestPathOptions<StdArc, Queue, ArcFilter> shortest_path_opts(
 			&state_queue, ArcFilter());
 	shortest_path_opts.first_path = true;
-	shortest_path_opts.nshortest = 2;
-	shortest_path_opts.unique = true;
+	//shortest_path_opts.nshortest = 10;
+	//shortest_path_opts.weight_threshold = 1;
+	//shortest_path_opts.state_threshold = 4;
+	//shortest_path_opts.unique = true;
+	//DeterminizeFst<StdArc> determinized(composed);
 	ShortestPath(composed, &ofst, &distance, shortest_path_opts);
 	ofst.Write("test2.fst");
 	return 0;
