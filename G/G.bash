@@ -18,7 +18,7 @@ fsmprint "$filename.$ngram.lm.fsm" | gawk '{print $1 "\t" $2 "\t" $3 "\t" $3 "\t
 echo $numbers | tr " " "\n" >> $filename.$ngram.lm.txt
 ###################
 
-cat "$filename.$ngram.lm.txt" | gawk '{print $1 "\t" $2 "\t" $3 "\t" $3 "\t" $4}' |fstcompile > $filename.$ngram.lm.fst
+cat "$filename.$ngram.lm.txt" |fstcompile > $filename.$ngram.lm.fst
 #this takes too long time
 #fstdraw --isymbols=../word_symbols.txt --osymbols=../word_symbols.txt < $filename.$ngram.lm.fst | dot -Tps > $filename.$ngram.lm.ps
 
