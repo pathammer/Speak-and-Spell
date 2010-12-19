@@ -249,18 +249,28 @@ vector<WordWeight> GetSingleWordCandidates(vector<string> prevWords, string curW
 	}
 	return result;
 }
-void GetBestSentenceCandidate(vector<string> sentence, float TLGRatio) {
+vector<string> GetBestSentenceCandidate(vector<string> sentence, float TLGRatio) {
 	vector<vector<WordWeight> > sentenceList;
 	for (int i = 0; i < sentence.size(); ++i) {
 		sentenceList.push_back(TLNShortestPath(sentence[i], 10, 10));
 	}
 	////////////////////
-	VectorFst<StdArc> result;
+	VectorFst<StdArc> resultFST;
 	VectorFst<StdArc> intermediateFST = BuildIntermediateFST(sentenceList, TLGRatio);
 	intermediateFST.Write("testt.fst"); //for debugging
 	RmEpsilonFst<StdArc> ITLG(ComposeFst<StdArc> (intermediateFST, *G));
-	ShortestPath(ITLG, &result);
-	result.Write("testt2.fst");
+	ShortestPath(ITLG, &resultFST);
+	resultFST.Write("testt2.fst");
+
+	vector<string> result;
+	int state = resultFST.Start();
+	while (resultFST.Final(state) == numeric_limits<float>::infinity()) {
+		ArcIterator<VectorFst<StdArc> > aiter(resultFST, state);
+		StdArc arc = aiter.Value();
+		result.push_back(SYMBOL.Word->Find(arc.olabel));
+		state = arc.nextstate;
+	}
+	return result;
 }
 
 vector<vector<string> > RefineText(string text) {
@@ -282,7 +292,9 @@ vector<vector<string> > RefineText(string text) {
 		} else if (chr == '.' || chr == '?' || chr == '!') {
 			result.push_back(vector<string> (1));//finish
 		} else {//todo if the last is not empty
-			result.back().push_back(string());
+			if (result.back().back().compare("") != 0) {
+				result.back().push_back(string());
+			}
 		}
 	}
 	return result;

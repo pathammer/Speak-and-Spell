@@ -91,6 +91,6 @@ extern vector<WordTLWeightGWeight> ComputeCandidateWords(vector<vector<WordWeigh
 extern vector<WordWeight> GetSingleWordCandidates(vector<string> prevWords, string curWord,
 		float TLGRatio);
 extern vector<vector<string> > RefineText(string text);
-extern void GetBestSentenceCandidate(vector<string> sentence, float TLGRatio);
+extern vector<string> GetBestSentenceCandidate(vector<string> sentence, float TLGRatio);
 #endif /* SPELLCHECKLIB_H_ */
 

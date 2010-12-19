@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'gui.h'
 **
-** Created: Sun Dec 19 09:04:05 2010
+** Created: Sun Dec 19 14:03:33 2010
 **      by: The Qt Meta Object Compiler version 62 (Qt 4.7.1)
 **
 ** WARNING! All changes made in this file will be lost!
@@ -23,7 +23,7 @@ static const uint qt_meta_data_gui[] = {
        5,       // revision
        0,       // classname
        0,    0, // classinfo
-       1,   14, // methods
+       3,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -32,12 +32,14 @@ static const uint qt_meta_data_gui[] = {
 
  // slots: signature, parameters, type, tag, flags
        5,    4,    4,    4, 0x0a,
+      12,    4,    4,    4, 0x0a,
+      20,    4,    4,    4, 0x0a,
 
        0        // eod
 };
 
 static const char qt_meta_stringdata_gui[] = {
-    "gui\0\0test()\0"
+    "gui\0\0test()\0test2()\0CorrectAll()\0"
 };
 
 const QMetaObject gui::staticMetaObject = {
@@ -70,9 +72,11 @@ int gui::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_c == QMetaObject::InvokeMetaMethod) {
         switch (_id) {
         case 0: test(); break;
+        case 1: test2(); break;
+        case 2: CorrectAll(); break;
         default: ;
         }
-        _id -= 1;
+        _id -= 3;
     }
     return _id;
 }

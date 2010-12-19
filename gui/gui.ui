@@ -6,45 +6,73 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>600</height>
+    <width>975</width>
+    <height>639</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QTextEdit" name="textEdit">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>10</y>
-      <width>351</width>
-      <height>461</height>
-     </rect>
-    </property>
-   </widget>
    <widget class="QPushButton" name="pushButton">
     <property name="geometry">
      <rect>
-      <x>40</x>
-      <y>490</y>
+      <x>310</x>
+      <y>60</y>
       <width>85</width>
       <height>27</height>
      </rect>
     </property>
     <property name="text">
-     <string>PushButton</string>
+     <string>Correct All</string>
+    </property>
+   </widget>
+   <widget class="QTextEdit" name="textEdit">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>30</y>
+      <width>261</width>
+      <height>421</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
     </property>
    </widget>
    <widget class="QTextEdit" name="textEdit_2">
     <property name="geometry">
      <rect>
-      <x>380</x>
-      <y>10</y>
-      <width>381</width>
-      <height>461</height>
+      <x>420</x>
+      <y>20</y>
+      <width>219</width>
+      <height>439</height>
      </rect>
+    </property>
+   </widget>
+   <widget class="QDoubleSpinBox" name="doubleSpinBox">
+    <property name="geometry">
+     <rect>
+      <x>300</x>
+      <y>20</y>
+      <width>101</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="decimals">
+     <number>3</number>
+    </property>
+    <property name="value">
+     <double>2.000000000000000</double>
     </property>
    </widget>
   </widget>
@@ -53,7 +81,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
+     <width>975</width>
      <height>21</height>
     </rect>
    </property>
@@ -66,7 +94,7 @@
    <sender>pushButton</sender>
    <signal>clicked()</signal>
    <receiver>guiClass</receiver>
-   <slot>test()</slot>
+   <slot>CorrectAll()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>82</x>
@@ -81,5 +109,7 @@
  </connections>
  <slots>
   <slot>test()</slot>
+  <slot>test2()</slot>
+  <slot>CorrectAll()</slot>
  </slots>
 </ui>
