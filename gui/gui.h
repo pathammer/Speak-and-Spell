@@ -77,8 +77,8 @@ public slots:
 		}
 	}
 	string ColorText(string text, float colorscale){
-		colorscale -= 0;
-		colorscale *= 15;
+		colorscale -= 5;
+		colorscale *= 17;
 		int intcolorscale = max(min((int)colorscale,255),0);
 		char *str = new char[8];
 		sprintf(str, "%lX", (unsigned long)(intcolorscale));
