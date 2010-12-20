@@ -18,7 +18,7 @@ RESOURCES +=
 INCLUDEPATH += ../spellchecklib/
 
 # it's not selectively added. TODO
-debug:LIBS += -L../spellchecklib/Debug/ \
+debug:LIBS += -L../spellchecklib/Release/ \
     -lspellchecklib \
     -lfst
 release:

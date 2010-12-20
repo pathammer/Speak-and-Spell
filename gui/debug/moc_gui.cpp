@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'gui.h'
 **
-** Created: Mon Dec 20 00:54:46 2010
+** Created: Mon Dec 20 03:06:59 2010
 **      by: The Qt Meta Object Compiler version 62 (Qt 4.7.1)
 **
 ** WARNING! All changes made in this file will be lost!

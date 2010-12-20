@@ -43,13 +43,22 @@ public slots:
 		vector<WordWeight> ww = GetSingleWordCandidates(refined2, refined.back(),
 				ui.doubleSpinBox->value());
 		ui.listWidget->clear();
+		map<int, float> mymap;
 		for (int i = 0; i < ww.size(); ++i) {
-			//cout << SYMBOL.Word->Find(ww[i].word).c_str() << "\n";
+			//cout << mymap[ww[i].word];
+			if (mymap[ww[i].word] == 0 || mymap[ww[i].word] > ww[i].weight) {
+				mymap[ww[i].word] = ww[i].weight;
+			}
+		}
+		map<float, int> mymap2;
+		for (map<int, float>::iterator i = mymap.begin(); i != mymap.end(); ++i) {
+			mymap2[i->second] = i->first;
+
+		}
+		for (map<float, int>::iterator i = mymap2.begin(); i != mymap2.end(); ++i) {
 			stringstream ss;// (stringstream::in | stringstream::out);
-			ss << ww[i].weight;
-
-
-			ui.listWidget->addItem((SYMBOL.Word->Find(ww[i].word)+ "\t" + ss.str()).c_str());
+			ss << i->first;
+			ui.listWidget->addItem((SYMBOL.Word->Find(i->second) + "\t" + ss.str()).c_str());
 		}
 	}
 };

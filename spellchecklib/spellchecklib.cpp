@@ -159,16 +159,15 @@ vector<WordWeight> TLNShortestPath(string currword, int numBestPath, int beamWid
 		//won't be taken again)
 		StdArc arc = (*TLArcs[remWord]).Value();
 		prevWeights[i] = arc.weight.Value();
-		arc.weight = numeric_limits<float>::infinity();
+		arc.weight = 99999;//numeric_limits<float>::infinity();
 		(*TLArcs[remWord]).SetValue(arc);
 	}
 	//Restore the original weights so that the same word can be chosen again later
 	//Todo clever way to do is remembering what arcs we removed and restores only those.
 	for (i = 0; i < numBestPath; i++) {
-		const StdArc &arc = (*TLArcs[prevPaths[i]]).Value();
-		StdArc arc2 = arc;
-		arc2.weight = prevWeights[i];
-		(*TLArcs[prevPaths[i]]).SetValue(arc2);
+		StdArc arc = (*TLArcs[prevPaths[i]]).Value();
+		arc.weight = prevWeights[i];
+		(*TLArcs[prevPaths[i]]).SetValue(arc);
 	}
 
 	return result;
