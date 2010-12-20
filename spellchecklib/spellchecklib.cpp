@@ -289,13 +289,49 @@ vector<vector<string> > RefineText(string text) {
 			result.back().back().push_back(chr);//stay
 		} else if (chr == '\'') {
 			;//delete
-		} else if (chr == '.' || chr == '?' || chr == '!') {
+		} else if (chr == '.' || chr == '?' || chr == '!' || chr == '\n') {
 			result.push_back(vector<string> (1));//finish
-		} else {//todo if the last is not empty
+		} else {
 			if (result.back().back().compare("") != 0) {
 				result.back().push_back(string());
 			}
 		}
 	}
 	return result;
+}
+vector<string> RefineText(string text, int index) {
+	vector<vector<string> > result;
+
+	result.push_back(vector<string> (1));
+	for (int i = 0; i < text.size(); ++i) {
+		char chr = text[i];
+
+		if ('A' <= chr && chr <= 'Z')
+			chr = chr - 'A' + 'a';
+
+		if ('a' <= chr && chr <= 'z') {
+			//cout << chr;
+			result.back().back().push_back(chr);//stay
+		} else if (chr == '\'') {
+			;//delete
+		} else if (chr == '.' || chr == '?' || chr == '!' || chr == '\n') {
+			result.push_back(vector<string> (1));//finish
+		} else {
+			if (result.back().back().compare("") != 0) {
+
+				if (i>= index)
+				{
+					break;
+				}
+				result.back().push_back(string());
+			}
+		}
+	}
+	int n=result.back().size();
+	vector<string> result2;
+	for (int i=max(0,n-3); i<n; ++i)
+	{
+		result2.push_back(result.back()[i]);
+	}
+	return result2;
 }

@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'gui.ui'
 **
-** Created: Sun Dec 19 13:55:02 2010
+** Created: Mon Dec 20 00:50:55 2010
 **      by: Qt User Interface Compiler version 4.7.1
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -15,12 +15,16 @@
 #include <QtGui/QApplication>
 #include <QtGui/QButtonGroup>
 #include <QtGui/QDoubleSpinBox>
+#include <QtGui/QHBoxLayout>
 #include <QtGui/QHeaderView>
+#include <QtGui/QLabel>
+#include <QtGui/QListWidget>
 #include <QtGui/QMainWindow>
 #include <QtGui/QMenuBar>
 #include <QtGui/QPushButton>
 #include <QtGui/QStatusBar>
 #include <QtGui/QTextEdit>
+#include <QtGui/QVBoxLayout>
 #include <QtGui/QWidget>
 
 QT_BEGIN_NAMESPACE
@@ -29,10 +33,17 @@ class Ui_guiClass
 {
 public:
     QWidget *centralwidget;
-    QPushButton *pushButton;
+    QHBoxLayout *horizontalLayout_2;
     QTextEdit *textEdit;
-    QTextEdit *textEdit_2;
+    QVBoxLayout *verticalLayout;
+    QLabel *label_2;
     QDoubleSpinBox *doubleSpinBox;
+    QPushButton *pushButton_3;
+    QPushButton *pushButton;
+    QPushButton *pushButton_2;
+    QListWidget *listWidget;
+    QLabel *label;
+    QTextEdit *textEdit_2;
     QMenuBar *menubar;
     QStatusBar *statusbar;
 
@@ -48,22 +59,95 @@ public:
         guiClass->setSizePolicy(sizePolicy);
         centralwidget = new QWidget(guiClass);
         centralwidget->setObjectName(QString::fromUtf8("centralwidget"));
-        pushButton = new QPushButton(centralwidget);
-        pushButton->setObjectName(QString::fromUtf8("pushButton"));
-        pushButton->setGeometry(QRect(310, 60, 85, 27));
+        horizontalLayout_2 = new QHBoxLayout(centralwidget);
+        horizontalLayout_2->setObjectName(QString::fromUtf8("horizontalLayout_2"));
         textEdit = new QTextEdit(centralwidget);
         textEdit->setObjectName(QString::fromUtf8("textEdit"));
-        textEdit->setGeometry(QRect(20, 30, 261, 421));
-        sizePolicy.setHeightForWidth(textEdit->sizePolicy().hasHeightForWidth());
-        textEdit->setSizePolicy(sizePolicy);
-        textEdit_2 = new QTextEdit(centralwidget);
-        textEdit_2->setObjectName(QString::fromUtf8("textEdit_2"));
-        textEdit_2->setGeometry(QRect(420, 20, 219, 439));
+        QSizePolicy sizePolicy1(QSizePolicy::Expanding, QSizePolicy::Expanding);
+        sizePolicy1.setHorizontalStretch(0);
+        sizePolicy1.setVerticalStretch(0);
+        sizePolicy1.setHeightForWidth(textEdit->sizePolicy().hasHeightForWidth());
+        textEdit->setSizePolicy(sizePolicy1);
+        QFont font;
+        font.setPointSize(20);
+        textEdit->setFont(font);
+
+        horizontalLayout_2->addWidget(textEdit);
+
+        verticalLayout = new QVBoxLayout();
+        verticalLayout->setSpacing(6);
+        verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
+        verticalLayout->setSizeConstraint(QLayout::SetDefaultConstraint);
+        verticalLayout->setContentsMargins(0, -1, -1, -1);
+        label_2 = new QLabel(centralwidget);
+        label_2->setObjectName(QString::fromUtf8("label_2"));
+
+        verticalLayout->addWidget(label_2);
+
         doubleSpinBox = new QDoubleSpinBox(centralwidget);
         doubleSpinBox->setObjectName(QString::fromUtf8("doubleSpinBox"));
-        doubleSpinBox->setGeometry(QRect(300, 20, 101, 31));
         doubleSpinBox->setDecimals(3);
         doubleSpinBox->setValue(2);
+
+        verticalLayout->addWidget(doubleSpinBox);
+
+        pushButton_3 = new QPushButton(centralwidget);
+        pushButton_3->setObjectName(QString::fromUtf8("pushButton_3"));
+
+        verticalLayout->addWidget(pushButton_3);
+
+        pushButton = new QPushButton(centralwidget);
+        pushButton->setObjectName(QString::fromUtf8("pushButton"));
+        QSizePolicy sizePolicy2(QSizePolicy::Minimum, QSizePolicy::Fixed);
+        sizePolicy2.setHorizontalStretch(0);
+        sizePolicy2.setVerticalStretch(0);
+        sizePolicy2.setHeightForWidth(pushButton->sizePolicy().hasHeightForWidth());
+        pushButton->setSizePolicy(sizePolicy2);
+        pushButton->setLayoutDirection(Qt::LeftToRight);
+
+        verticalLayout->addWidget(pushButton);
+
+        pushButton_2 = new QPushButton(centralwidget);
+        pushButton_2->setObjectName(QString::fromUtf8("pushButton_2"));
+
+        verticalLayout->addWidget(pushButton_2);
+
+        listWidget = new QListWidget(centralwidget);
+        listWidget->setObjectName(QString::fromUtf8("listWidget"));
+        QSizePolicy sizePolicy3(QSizePolicy::Preferred, QSizePolicy::Expanding);
+        sizePolicy3.setHorizontalStretch(0);
+        sizePolicy3.setVerticalStretch(0);
+        sizePolicy3.setHeightForWidth(listWidget->sizePolicy().hasHeightForWidth());
+        listWidget->setSizePolicy(sizePolicy3);
+        QFont font1;
+        font1.setPointSize(12);
+        listWidget->setFont(font1);
+        listWidget->setFlow(QListView::TopToBottom);
+        listWidget->setProperty("isWrapping", QVariant(false));
+        listWidget->setGridSize(QSize(10, 20));
+        listWidget->setViewMode(QListView::ListMode);
+        listWidget->setModelColumn(0);
+        listWidget->setUniformItemSizes(false);
+        listWidget->setSortingEnabled(false);
+
+        verticalLayout->addWidget(listWidget);
+
+        label = new QLabel(centralwidget);
+        label->setObjectName(QString::fromUtf8("label"));
+        sizePolicy3.setHeightForWidth(label->sizePolicy().hasHeightForWidth());
+        label->setSizePolicy(sizePolicy3);
+
+        verticalLayout->addWidget(label);
+
+
+        horizontalLayout_2->addLayout(verticalLayout);
+
+        textEdit_2 = new QTextEdit(centralwidget);
+        textEdit_2->setObjectName(QString::fromUtf8("textEdit_2"));
+        textEdit_2->setFont(font);
+
+        horizontalLayout_2->addWidget(textEdit_2);
+
         guiClass->setCentralWidget(centralwidget);
         menubar = new QMenuBar(guiClass);
         menubar->setObjectName(QString::fromUtf8("menubar"));
@@ -75,6 +159,10 @@ public:
 
         retranslateUi(guiClass);
         QObject::connect(pushButton, SIGNAL(clicked()), guiClass, SLOT(CorrectAll()));
+        QObject::connect(pushButton_2, SIGNAL(clicked()), guiClass, SLOT(CorrectWord()));
+
+        listWidget->setCurrentRow(-1);
+
 
         QMetaObject::connectSlotsByName(guiClass);
     } // setupUi
@@ -82,7 +170,11 @@ public:
     void retranslateUi(QMainWindow *guiClass)
     {
         guiClass->setWindowTitle(QApplication::translate("guiClass", "MainWindow", 0, QApplication::UnicodeUTF8));
+        label_2->setText(QApplication::translate("guiClass", "TLG Ratio", 0, QApplication::UnicodeUTF8));
+        pushButton_3->setText(QApplication::translate("guiClass", "Analysis", 0, QApplication::UnicodeUTF8));
         pushButton->setText(QApplication::translate("guiClass", "Correct All", 0, QApplication::UnicodeUTF8));
+        pushButton_2->setText(QApplication::translate("guiClass", "Correct a word", 0, QApplication::UnicodeUTF8));
+        label->setText(QString());
     } // retranslateUi
 
 };
