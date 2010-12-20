@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'gui.h'
 **
-** Created: Mon Dec 20 03:06:59 2010
+** Created: Mon Dec 20 09:29:56 2010
 **      by: The Qt Meta Object Compiler version 62 (Qt 4.7.1)
 **
 ** WARNING! All changes made in this file will be lost!
@@ -23,7 +23,7 @@ static const uint qt_meta_data_gui[] = {
        5,       // revision
        0,       // classname
        0,    0, // classinfo
-       2,   14, // methods
+       4,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -33,12 +33,16 @@ static const uint qt_meta_data_gui[] = {
  // slots: signature, parameters, type, tag, flags
        5,    4,    4,    4, 0x0a,
       18,    4,    4,    4, 0x0a,
+      55,   39,   32,    4, 0x0a,
+      79,    4,    4,    4, 0x0a,
 
        0        // eod
 };
 
 static const char qt_meta_stringdata_gui[] = {
-    "gui\0\0CorrectAll()\0CorrectWord()\0"
+    "gui\0\0CorrectAll()\0CorrectWord()\0string\0"
+    "text,colorscale\0ColorText(string,float)\0"
+    "Analysis_()\0"
 };
 
 const QMetaObject gui::staticMetaObject = {
@@ -72,9 +76,12 @@ int gui::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
         switch (_id) {
         case 0: CorrectAll(); break;
         case 1: CorrectWord(); break;
+        case 2: { string _r = ColorText((*reinterpret_cast< string(*)>(_a[1])),(*reinterpret_cast< float(*)>(_a[2])));
+            if (_a[0]) *reinterpret_cast< string*>(_a[0]) = _r; }  break;
+        case 3: Analysis_(); break;
         default: ;
         }
-        _id -= 2;
+        _id -= 4;
     }
     return _id;
 }

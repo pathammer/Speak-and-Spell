@@ -20,6 +20,21 @@ public:
 
 private:
 	Ui::guiClass ui;
+	map<float, int> SortWordWeight(vector<WordWeight> ww) {
+		map<int, float> mymap;
+		for (int i = 0; i < ww.size(); ++i) {
+			//cout << mymap[ww[i].word];
+			if (mymap[ww[i].word] == 0 || mymap[ww[i].word] > ww[i].weight) {
+				mymap[ww[i].word] = ww[i].weight;
+			}
+		}
+		map<float, int> mymap2;
+		for (map<int, float>::iterator i = mymap.begin(); i != mymap.end(); ++i) {
+			mymap2[i->second] = i->first;
+		}
+		return mymap2;
+
+	}
 public slots:
 	void CorrectAll() {
 		string text = ui.textEdit->document()->toPlainText().toStdString();
@@ -60,6 +75,30 @@ public slots:
 			ss << i->first;
 			ui.listWidget->addItem((SYMBOL.Word->Find(i->second) + "\t" + ss.str()).c_str());
 		}
+	}
+	string ColorText(string text, float colorscale){
+		colorscale -= 0;
+		colorscale *= 15;
+		int intcolorscale = max(min((int)colorscale,255),0);
+		char *str = new char[8];
+		sprintf(str, "%lX", (unsigned long)(intcolorscale));
+		return string() + "<font color=\"#" + str + "0000\">" + text + "</font>";
+	}
+	void Analysis_() {
+
+		string text = ui.textEdit->document()->toPlainText().toStdString();
+		vector<vector<string> > refined = RefineText(text);
+		vector<vector<WordWeight> > result =
+				Analysis(refined[0], (float) ui.doubleSpinBox->value());
+		string final;
+		for (int i = 0; i < result.size(); ++i) {
+			map<float, int> mymap = SortWordWeight(result[i]);
+			stringstream ss;// (stringstream::in | stringstream::out);
+			ss << mymap.begin()->first;
+			final += ColorText(refined[0][i],mymap.begin()->first) + " ";
+		}
+		//ui.textEdit_2->document()->setPlainText(final.c_str());
+		ui.textEdit_2->document()->setHtml(final.c_str());
 	}
 };
 

@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'gui.ui'
 **
-** Created: Mon Dec 20 00:50:55 2010
+** Created: Mon Dec 20 09:07:01 2010
 **      by: Qt User Interface Compiler version 4.7.1
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -34,7 +34,9 @@ class Ui_guiClass
 public:
     QWidget *centralwidget;
     QHBoxLayout *horizontalLayout_2;
+    QVBoxLayout *verticalLayout_2;
     QTextEdit *textEdit;
+    QTextEdit *textEdit_2;
     QVBoxLayout *verticalLayout;
     QLabel *label_2;
     QDoubleSpinBox *doubleSpinBox;
@@ -42,8 +44,6 @@ public:
     QPushButton *pushButton;
     QPushButton *pushButton_2;
     QListWidget *listWidget;
-    QLabel *label;
-    QTextEdit *textEdit_2;
     QMenuBar *menubar;
     QStatusBar *statusbar;
 
@@ -51,7 +51,7 @@ public:
     {
         if (guiClass->objectName().isEmpty())
             guiClass->setObjectName(QString::fromUtf8("guiClass"));
-        guiClass->resize(975, 639);
+        guiClass->resize(946, 378);
         QSizePolicy sizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
         sizePolicy.setHorizontalStretch(0);
         sizePolicy.setVerticalStretch(0);
@@ -61,6 +61,9 @@ public:
         centralwidget->setObjectName(QString::fromUtf8("centralwidget"));
         horizontalLayout_2 = new QHBoxLayout(centralwidget);
         horizontalLayout_2->setObjectName(QString::fromUtf8("horizontalLayout_2"));
+        verticalLayout_2 = new QVBoxLayout();
+        verticalLayout_2->setObjectName(QString::fromUtf8("verticalLayout_2"));
+        verticalLayout_2->setContentsMargins(-1, -1, 0, -1);
         textEdit = new QTextEdit(centralwidget);
         textEdit->setObjectName(QString::fromUtf8("textEdit"));
         QSizePolicy sizePolicy1(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -72,7 +75,16 @@ public:
         font.setPointSize(20);
         textEdit->setFont(font);
 
-        horizontalLayout_2->addWidget(textEdit);
+        verticalLayout_2->addWidget(textEdit);
+
+        textEdit_2 = new QTextEdit(centralwidget);
+        textEdit_2->setObjectName(QString::fromUtf8("textEdit_2"));
+        textEdit_2->setFont(font);
+
+        verticalLayout_2->addWidget(textEdit_2);
+
+
+        horizontalLayout_2->addLayout(verticalLayout_2);
 
         verticalLayout = new QVBoxLayout();
         verticalLayout->setSpacing(6);
@@ -132,26 +144,13 @@ public:
 
         verticalLayout->addWidget(listWidget);
 
-        label = new QLabel(centralwidget);
-        label->setObjectName(QString::fromUtf8("label"));
-        sizePolicy3.setHeightForWidth(label->sizePolicy().hasHeightForWidth());
-        label->setSizePolicy(sizePolicy3);
-
-        verticalLayout->addWidget(label);
-
 
         horizontalLayout_2->addLayout(verticalLayout);
-
-        textEdit_2 = new QTextEdit(centralwidget);
-        textEdit_2->setObjectName(QString::fromUtf8("textEdit_2"));
-        textEdit_2->setFont(font);
-
-        horizontalLayout_2->addWidget(textEdit_2);
 
         guiClass->setCentralWidget(centralwidget);
         menubar = new QMenuBar(guiClass);
         menubar->setObjectName(QString::fromUtf8("menubar"));
-        menubar->setGeometry(QRect(0, 0, 975, 21));
+        menubar->setGeometry(QRect(0, 0, 946, 21));
         guiClass->setMenuBar(menubar);
         statusbar = new QStatusBar(guiClass);
         statusbar->setObjectName(QString::fromUtf8("statusbar"));
@@ -160,6 +159,7 @@ public:
         retranslateUi(guiClass);
         QObject::connect(pushButton, SIGNAL(clicked()), guiClass, SLOT(CorrectAll()));
         QObject::connect(pushButton_2, SIGNAL(clicked()), guiClass, SLOT(CorrectWord()));
+        QObject::connect(pushButton_3, SIGNAL(clicked()), guiClass, SLOT(Analysis_()));
 
         listWidget->setCurrentRow(-1);
 
@@ -171,10 +171,9 @@ public:
     {
         guiClass->setWindowTitle(QApplication::translate("guiClass", "MainWindow", 0, QApplication::UnicodeUTF8));
         label_2->setText(QApplication::translate("guiClass", "TLG Ratio", 0, QApplication::UnicodeUTF8));
-        pushButton_3->setText(QApplication::translate("guiClass", "Analysis", 0, QApplication::UnicodeUTF8));
+        pushButton_3->setText(QApplication::translate("guiClass", "Analyze", 0, QApplication::UnicodeUTF8));
         pushButton->setText(QApplication::translate("guiClass", "Correct All", 0, QApplication::UnicodeUTF8));
         pushButton_2->setText(QApplication::translate("guiClass", "Correct a word", 0, QApplication::UnicodeUTF8));
-        label->setText(QString());
     } // retranslateUi
 
 };

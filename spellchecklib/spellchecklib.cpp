@@ -63,7 +63,7 @@ VectorFst<StdArc> StringToFst(const char* str) {
 
 ofstream myfile;
 StdFst *G = StdFst::Read("../G/train.3.lm.fst");
-VectorFst<StdArc> *TL = VectorFst<StdArc>::Read("../TL.fst");
+VectorFst<StdArc> *TL = VectorFst<StdArc>::Read("../TL_swap.fst");
 MutableArcIterator<VectorFst<StdArc> > *TLArcs[44694] = { 0, };
 
 void init() {
@@ -102,6 +102,7 @@ void cleanup() {
 //Output:
 //		word.0, weight.0, ..., word.n, weight.n
 vector<WordWeight> TLNShortestPath(string currword, int numBestPath, int beamWidth) {
+	//VectorFst<StdArc> TLlocal = *TL;
 	int i = 0;
 	int remWord;
 	float wordWeight = 0;
@@ -248,6 +249,27 @@ vector<WordWeight> GetSingleWordCandidates(vector<string> prevWords, string curW
 	}
 	return result;
 }
+vector<vector<WordWeight> > Analysis(vector<string> words, float TLGRatio) {
+	vector<vector<WordWeight> > candidates2;
+	for (int i = 0; i < words.size(); ++i) {
+		vector<vector<WordWeight> > previousData;
+		for (int i = max(0, (int)candidates2.size() - 3); i < candidates2.size(); ++i) {
+			previousData.push_back(candidates2[i]);
+		}
+		vector<WordTLWeightGWeight> candidates = ComputeCandidateWords(previousData, words[i], 10,
+				10, TLGRatio);
+
+		candidates2.push_back(vector<WordWeight> ());
+		for (int i = 0; i < candidates.size(); ++i) {
+			WordWeight tmp;
+			tmp.word = candidates[i].word;
+			tmp.weight = candidates[i].TLweight * TLGRatio + candidates[i].Gweight;
+			candidates2.back().push_back(tmp);
+		}
+
+	}
+	return candidates2;
+}
 vector<string> GetBestSentenceCandidate(vector<string> sentence, float TLGRatio) {
 	vector<vector<WordWeight> > sentenceList;
 	for (int i = 0; i < sentence.size(); ++i) {
@@ -318,18 +340,16 @@ vector<string> RefineText(string text, int index) {
 		} else {
 			if (result.back().back().compare("") != 0) {
 
-				if (i>= index)
-				{
+				if (i >= index) {
 					break;
 				}
 				result.back().push_back(string());
 			}
 		}
 	}
-	int n=result.back().size();
+	int n = result.back().size();
 	vector<string> result2;
-	for (int i=max(0,n-3); i<n; ++i)
-	{
+	for (int i = max(0, n - 3); i < n; ++i) {
 		result2.push_back(result.back()[i]);
 	}
 	return result2;
