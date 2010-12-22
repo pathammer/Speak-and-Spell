@@ -165,12 +165,14 @@ vector<WordWeight> TLNShortestPath(string currword, int numBestPath, int beamWid
 	}
 	//Restore the original weights so that the same word can be chosen again later
 	//Todo clever way to do is remembering what arcs we removed and restores only those.
-	for (i = numBestPath-1; i >= 0; i--) {
+	for (i = numBestPath - 1; i >= 0; i--) {
 		StdArc arc = (*TLArcs[prevPaths[i]]).Value();
 		arc.weight = prevWeights[i];
 		(*TLArcs[prevPaths[i]]).SetValue(arc);
 	}
-
+//	for (int i = 0; i < result.size(); ++i) {
+//		cout << SYMBOL.Word->Find(result[i].word) << "\n";
+//	}
 	return result;
 }
 VectorFst<StdArc> BuildIntermediateFST(vector<vector<WordWeight> > Data, float TLGRatio) {
@@ -188,6 +190,7 @@ VectorFst<StdArc> BuildIntermediateFST(vector<vector<WordWeight> > Data, float T
 			for (int k = 0; k < stateMap[i].size(); ++k) {
 				result.AddArc(stateMap[i][k], StdArc(0, Data[i][j].word, Data[i][j].weight
 						* TLGRatio, stateMap[i + 1][j]));
+				//cout << "inter " << SYMBOL.Word->Find(Data[i][j].word) << "\n";
 			}
 		}
 	}
@@ -204,16 +207,16 @@ vector<WordTLWeightGWeight> ComputeCandidateWords(vector<vector<WordWeight> > pr
 	vector<WordWeight> TLResult = TLNShortestPath(currword, numBestPath, beamWidth);
 	previousData.push_back(TLResult);
 	VectorFst<StdArc> intermediateFST = BuildIntermediateFST(previousData, TLGRatio);
-	//intermediateFST.Write("test.fst"); //for debugging
+	intermediateFST.Write("intermediate.fst"); //for debugging
 
 	RmEpsilonFst<StdArc> ITLG(ComposeFst<StdArc> (intermediateFST, *G));
 	ShortestPath(ITLG, &result, numBestPath);
-	//result.Write("test2.fst"); //for debugging
+	result.Write("test2.fst"); //for debugging
 
 	VectorFst<StdArc> result2;
 	Reverse(result, &result2);
 	RmEpsilon(&result2);
-	//result2.Write("test3.fst"); //for debugging
+	result2.Write("test3.fst"); //for debugging
 
 	vector<WordTLWeightGWeight> result3;
 	for (ArcIterator<StdFst> aiter(result2, 0); !aiter.Done(); aiter.Next()) {
@@ -253,7 +256,7 @@ vector<vector<WordWeight> > Analysis(vector<string> words, float TLGRatio) {
 	vector<vector<WordWeight> > candidates2;
 	for (int i = 0; i < words.size(); ++i) {
 		vector<vector<WordWeight> > previousData;
-		for (int i = max(0, (int)candidates2.size() - 3); i < candidates2.size(); ++i) {
+		for (int i = max(0, (int) candidates2.size() - 3); i < candidates2.size(); ++i) {
 			previousData.push_back(candidates2[i]);
 		}
 		vector<WordTLWeightGWeight> candidates = ComputeCandidateWords(previousData, words[i], 10,
